@@ -92,9 +92,45 @@ Pekerjaan untuk **US-01: Katalog dari database** telah selesai.
 
 ## US-02 Detail produk
 
-**Prompt:**
+**Prompt:*Baca docs/user-stories.md bagian US-02.
 
-**Hasil:**
+Ubah app/produk/[id]/page.jsx supaya mengambil satu produk dari tabel "produk" di Supabase berdasarkan id di URL, di sisi server, memakai koneksi Supabase yang sudah dibuat di lib/supabase. Kalau produk tidak ditemukan, panggil notFound(). Jangan ubah tampilannya. Hapus CatatanBelumAktif dari halaman ini, tapi biarkan tombol WhatsApp.*
+
+**Hasil:*Ran command: `node --env-file=.env.local -e "import('./lib/supabase/server.js').then(m => m.createClient().from('produk').select('id, nama').limit(5)).then(r => console.log(r))"`
+Ran command: `node --env-file=.env.local -e "import('./lib/supabase/server.js').then(m => m.createClient().from('produk').select('id, nama').order('id', {ascending: true}).limit(5)).then(r => console.log(r))"`
+Ran command: `powershell -Command "try { $res = Invoke-WebRequest -Uri 'http://localhost:3000/produk/1' -UseBasicParsing; $res.StatusCode; $res.Content.Substring(0, 500) } catch { $_.Exception.Response.StatusCode.value__; $_.Exception.Message }"`
+Ran command: `node -e "fetch('http://localhost:3000/produk/1').then(async r => { console.log('Status:', r.status); console.log(await r.text()); })"`
+Ran command: `node -e "fetch('http://localhost:3000/produk/1').then(async r => { console.log('Status /produk/1:', r.status); const text = await r.text(); console.log('Contains Emas 1KG:', text.includes('Emas 1KG')); console.log('Contains CatatanBelumAktif:', text.includes('CatatanBelumAktif') || text.includes('Tombol pesan belum berfungsi')); console.log('Contains TombolWhatsApp:', text.includes('Pesan via WhatsApp')); })"`
+Ran command: `node -e "fetch('http://localhost:3000/produk/99999').then(async r => { console.log('Status /produk/99999:', r.status); const text = await r.text(); console.log('Contains Halaman tidak ditemukan:', text.includes('Halaman tidak ditemukan')); })"`
+Ran command: `node -e "fetch('http://localhost:3000/produk/abc').then(async r => { console.log('Status /produk/abc:', r.status); const text = await r.text(); console.log('Contains Halaman tidak ditemukan:', text.includes('Halaman tidak ditemukan')); })"`
+Ran command: `npx next build --webpack`
+Used tool: manage_task
+Used tool: manage_task
+Used tool: manage_task
+Used tool: manage_task
+Used tool: manage_task
+
+Pekerjaan untuk **US-02: Detail produk** telah selesai.
+
+### Perubahan yang Dilakukan
+
+- **[app/produk/[id]/page.jsx](file:///c:/Faiz/My%20project/katalog-umkm/app/produk/%5Bid%5D/page.jsx)**:
+  - Mengambil satu produk dari tabel `produk` di Supabase berdasarkan `id` pada parameter URL di sisi server menggunakan `createServerClient()` dari [lib/supabase/server.js](file:///c:/Faiz/My%20project/katalog-umkm/lib/supabase/server.js).
+  - Memanggil `notFound()` dari `next/navigation` jika produk tidak ditemukan di database atau jika format ID tidak valid.
+  - Menghapus komponen `CatatanBelumAktif` dan impor data contoh dari `lib/data-contoh.js`.
+  - Mempertahankan komponen [TombolWhatsApp](file:///c:/Faiz/My%20project/katalog-umkm/components/TombolWhatsApp.jsx) dan seluruh struktur tampilan halaman detail.
+
+---
+
+### Cara Mengetes
+
+1. **Buka Produk yang Ada**:
+   - Buka beranda di `http://localhost:3000` dan klik salah satu produk, atau langsung kunjungi `http://localhost:3000/produk/1`.
+   - Pastikan foto, kategori, nama, harga (format rupiah), dan deskripsi sesuai dengan data di Supabase.
+   - Pastikan tombol WhatsApp tetap tampil dan catatan belum aktif sudah tidak ada.
+2. **Uji Produk yang Tidak Ada**:
+   - Buka URL produk dengan ID yang tidak ada, misalnya `http://localhost:3000/produk/99999` atau `http://localhost:3000/produk/abc`.
+   - Pastikan halaman menampilkan tampilan *"Halaman tidak ditemukan"* (`app/not-found.jsx`).*
 
 **Perbaikan:**
 
