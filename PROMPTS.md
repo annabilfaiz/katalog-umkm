@@ -136,9 +136,53 @@ Pekerjaan untuk **US-02: Detail produk** telah selesai.
 
 ## US-03 Pesan via WhatsApp
 
-**Prompt:**
+**Prompt:*Baca docs/rancangan-teknis.md bagian "Pesan WhatsApp (US-03)".
 
-**Hasil:**
+Ubah components/TombolWhatsApp.jsx menjadi tautan yang membuka https://wa.me/ ke nomor di lib/toko.js, dengan pesan otomatis berisi nama dan harga produk dalam format rupiah. Pesan di-encode dengan encodeURIComponent dan dibuka di tab baru. Pertahankan tampilan tombolnya. Hapus CatatanBelumAktif yang menyebut US-03 di halaman detail produk.*
+
+**Hasil:*Viewed toko.js:1-10
+Viewed TombolWhatsApp.jsx:1-13
+Viewed format.js:1-8
+Viewed page.jsx:1-46
+Searched for "CatatanBelumAktif"
+Searched for "Halo, saya ingin memesan"
+Searched for "wa.me"
+Edited TombolWhatsApp.jsx
+Ran command: `node -e "fetch('http://localhost:3000/produk/1').then(r => r.text()).then(t => { const match = t.match(/<a[^>]*href=\"https:\/\/wa\.me\/[^\"]*\"[^>]*>.*?<\/a>/s); console.log('Found WA link:', match ? match[0] : 'NOT FOUND'); })"`
+Ran command: `node -e "fetch('http://localhost:3000/produk/1').then(r=>r.text()).then(t => { const idx = t.indexOf('https://wa.me'); console.log(t.substring(idx, idx + 250)); })"`
+Ran command: `npx next build --webpack`
+Used tool: manage_task
+Used tool: manage_task
+Used tool: manage_task
+Used tool: manage_task
+
+Pekerjaan untuk **US-03: Pesan via WhatsApp** telah selesai.
+
+### Perubahan yang Dilakukan
+
+- **[components/TombolWhatsApp.jsx](file:///c:/Faiz/My%20project/katalog-umkm/components/TombolWhatsApp.jsx)**:
+  - Mengubah elemen `<button>` menjadi tautan `<a>` dengan URL tujuan `https://wa.me/<nomor>?text=<pesan>`.
+  - Mengambil nomor WhatsApp toko dari [lib/toko.js](file:///c:/Faiz/My%20project/katalog-umkm/lib/toko.js).
+  - Mengisi pesan otomatis yang memuat nama produk dan harga dalam format rupiah (`formatRupiah`), yang di-encode menggunakan `encodeURIComponent`.
+  - Membuka tautan di tab baru dengan atribut `target="_blank"` dan `rel="noopener noreferrer"`.
+  - Mempertahankan styling tombol yang sudah ada.
+- **[app/produk/[id]/page.jsx](file:///c:/Faiz/My%20project/katalog-umkm/app/produk/%5Bid%5D/page.jsx)**:
+  - Memastikan komponen `CatatanBelumAktif` terkait US-03 sudah tidak ada di halaman detail produk.
+
+---
+
+### Cara Mengetes
+
+1. Buka salah satu halaman produk, misalnya `http://localhost:3000/produk/1`.
+2. Klik tombol **"Pesan via WhatsApp"**.
+3. Pastikan browser membuka tab baru ke alamat WhatsApp:
+   ```text
+   https://wa.me/6281374523794?text=Halo%2C%20saya%20ingin%20memesan%20Emas%201KG%20seharga%20Rp%C2%A018.000.
+   ```
+4. Di WhatsApp Web atau aplikasi WhatsApp di HP, teks pesan akan otomatis terisi:
+   ```text
+   Halo, saya ingin memesan Emas 1KG seharga Rp 18.000.
+   ```*
 
 **Perbaikan:**
 
