@@ -198,5 +198,47 @@ export async function ubahProduk(idOrPrevState, prevStateOrFormData, maybeFormDa
   redirect("/admin");
 }
 
+/**
+ * Server Action untuk menghapus produk dari database.
+ */
+export async function hapusProduk(idOrFormData) {
+  let id;
+  if (idOrFormData instanceof FormData) {
+    id = idOrFormData.get("id");
+  } else if (typeof idOrFormData === "object" && idOrFormData?.get) {
+    id = idOrFormData.get("id");
+  } else {
+    id = idOrFormData;
+  }
+
+  if (!id) {
+    return { error: "ID produk tidak valid atau tidak ditemukan." };
+  }
+
+  const supabase = await createSessionClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    return { error: "Sesi telah berakhir atau Anda belum masuk. Aksi ditolak." };
+  }
+
+  const { error } = await supabase
+    .from("produk")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    return { error: error.message || "Gagal menghapus produk dari database." };
+  }
+
+  revalidatePath("/admin");
+  revalidatePath("/");
+  revalidatePath(`/produk/${id}`);
+  return { success: true };
+}
+
 
 

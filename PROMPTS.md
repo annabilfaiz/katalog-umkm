@@ -500,5 +500,83 @@ Fitur **US-09 Ubah produk** telah selesai diimplementasikan sesuai dengan seluru
 5. **Uji proteksi login**:
    - Logout dari admin.
    - Coba akses URL `/admin/produk/[id]/ubah` secara langsung di browser tanpa login. Halaman akan otomatis dialihkan ke `/admin/login`.
+
+### US-10 Hapus produk
+
+Sebagai admin, saya ingin menghapus produk.
+
+Bernilai 10 poin.
+
+Kriteria selesai:
+
+- Tombol "Hapus" meminta konfirmasi. (4 poin)
+- Produk terhapus dari database. (3 poin)
+- Aksinya terlindungi login: tanpa login ditolak oleh server. (3 poin)
+
+### Perubahan yang Dilakukan
+
+Viewed TabelProduk.jsx:1-47
+Searched for "US-10"
+Viewed schema.sql:1-91
+Viewed page.jsx:1-52
+Viewed Tombol.jsx:1-26
+Searched for "konfirmasi"
+Viewed checklist-pengujian.md:1-27
+Listed directory components
+Viewed DESIGN.md:1-52
+Searched for "hapus"
+Viewed session.js:1-40
+Searched for "TabelProduk"
+Searched for "US-10"
+Searched for "CatatanBelumAktif"
+Viewed actions.js:110-203
+Viewed actions.js:1-45
+Viewed actions.js:190-203
+Viewed TabelProduk.jsx:1-47
+Edited actions.js
+Viewed TabelProduk.jsx:1-47
+Edited TabelProduk.jsx
+Ran command: `npx next build --webpack`
+
+Saat ini sedang memverifikasi build aplikasi untuk memastikan implementasi **US-10: Hapus produk** berjalan lancar tanpa kendala.
+
+Ran command: `node --env-file=.env.local -e "import('./app/admin/actions.js').then(async m => { const res = await m.hapusProduk(999999); console.log('hapusProduk unauth result:', res); })"`
+
+Fitur **US-10 Hapus produk** telah selesai diimplementasikan sesuai dengan seluruh kriteria yang ditentukan.
+
+### Ringkasan Perubahan
+
+1. [app/admin/actions.js](file:///c:/Faiz/My%20project/katalog-umkm/app/admin/actions.js)
+   - Menambahkan Server Action `hapusProduk`.
+   - **Proteksi di server**: Memverifikasi sesi login admin via `supabase.auth.getUser()`, menolak aksi jika sesi tidak ada/tidak valid (`"Sesi telah berakhir atau Anda belum masuk. Aksi ditolak."`).
+   - Menghapus baris produk dari tabel `produk` di Supabase berdasarkan ID (`.delete().eq("id", id)`), yang juga dilindungi oleh kebijakan RLS `admin_hapus_produk`.
+   - Melakukan revalidasi cache (`revalidatePath`) untuk `/admin`, `/`, dan `/produk/[id]`.
+
+2. [components/TabelProduk.jsx](file:///c:/Faiz/My%20project/katalog-umkm/components/TabelProduk.jsx)
+   - Mengubah komponen menjadi Client Component (`"use client"`).
+   - Menambahkan konfirmasi sebelum menghapus produk dengan dialog browser `window.confirm("Apakah Anda yakin ingin menghapus produk \"...\"?")`.
+   - Jika dikonfirmasi, memanggil Server Action `hapusProduk(produk.id)` dengan status pending ("Menghapus...") dan penanganan error.
+   - Menampilkan fallback `"Belum ada produk."` jika daftar produk kosong.
+
+---
+
+### Cara Mengetes
+
+1. **Pastikan dev server aktif dan buka halaman admin**:
+   Akses `http://localhost:3000/admin` (pastikan sudah login sebagai admin).
+2. **Uji pembatalan konfirmasi**:
+   - Klik tombol **Hapus** pada salah satu produk.
+   - Kotak dialog konfirmasi akan muncul.
+   - Klik **Batal / Cancel**.
+   - Produk tidak akan terhapus dan tetap berada di daftar.
+3. **Uji hapus produk**:
+   - Klik tombol **Hapus** pada produk yang ingin dihapus (bisa buat produk uji coba baru terlebih dahulu lewat tombol "Tambah produk").
+   - Klik **OK** pada dialog konfirmasi.
+   - Tombol akan menampilkan teks "Menghapus..." sesaat, lalu produk langsung terhapus dari database dan otomatis hilang dari tabel `/admin`.
+   - Periksa halaman utama (`/`) untuk memastikan produk tersebut juga sudah hilang dari katalog publik.
+4. **Uji proteksi server (tanpa login)**:
+   - Klik **Keluar** di menu admin untuk mengakhiri sesi.
+   - Aksi mutasi penghapusan di `hapusProduk` dilindungi di server dan ditolak secara otomatis oleh Supabase Auth & RLS jika tidak ada sesi yang valid.
+
    
 Tambahkan bagian baru untuk setiap error yang kamu perbaiki atau fitur bonus yang kamu kerjakan.
