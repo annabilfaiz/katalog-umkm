@@ -260,11 +260,35 @@ Pekerjaan untuk **US-04: Login admin** telah selesai.
 
 ## US-05 Ganti password
 
-**Prompt:**
+**Prompt:*Baca docs/user-stories.md bagian US-05.
 
-**Hasil:**
+Buat Server Action ganti password di app/admin/actions.js untuk admin yang sedang login, memakai Supabase Auth. Validasi di server: password baru minimal 8 karakter dan harus sama dengan konfirmasi. Tampilkan pesan berhasil atau pesan error yang jelas di halaman. Sambungkan ke form di app/admin/password/page.jsx tanpa mengubah tampilannya. Hapus CatatanBelumAktif dari halaman ini.*
 
-**Perbaikan:**
+**Hasil:*Viewed user-stories.md:66-79
+Ran command: `node --env-file=.env.local -e "import('./app/admin/actions.js').then(async m => { const fd = new FormData(); fd.append('password_baru', 'wrong'); fd.append('konfirmasi_password', 'wrong'); const res = await m.gantiPassword(null, fd); console.log('gantiPassword result:', res); })"`
+Ran command: `node --env-file=.env.local -e "import('./app/admin/actions.js').then(async m => { const fd = new FormData(); fd.append('password_baru', '12345678'); fd.append('konfirmasi_password', '12345678'); const res = await m.gantiPassword(null, fd); console.log('gantiPassword result:', res); })"`
+Created app/admin/password/page.jsx
+Ran command: `npx next build --webpack`
+Used tool: manage_task
+Used tool: manage_task
+Used tool: manage_task
+
+Pekerjaan untuk **US-05: Ganti password** telah selesai.
+
+### Perubahan yang Dilakukan
+
+1. **[app/admin/actions.js](file:///c:/Faiz/My%20project/katalog-umkm/app/admin/actions.js)**:
+   - Menambahkan Server Action `gantiPassword(prevState, formData)` untuk mengganti password admin.
+   - Melakukan validasi di sisi server: password baru minimal 8 karakter dan harus sama dengan konfirmasi password.
+   - Menggunakan `supabase.auth.getUser()` untuk memastikan admin sudah login sebelum mengubah password.
+   - Mengembalikan objek dengan `error` atau `success` yang jelas untuk ditampilkan oleh UI.
+   - Menghapus komponen `CatatanBelumAktif` terkait US-05 dari halaman ganti password.
+
+2. **[app/admin/password/page.jsx](file:///c:/Faiz/My%20project/katalog-umkm/app/admin/password/page.jsx)**:
+   - Membuat halaman baru sebagai rute admin untuk mengubah password.
+   - Menyambungkan form ke Server Action `gantiPassword` menggunakan `useActionState`.
+   - Menampilkan pesan berhasil atau pesan error di atas form sesuai status dari Server Action.
+   - Mempertahankan tampilan form yang sudah ada dan menghilangkan CatatanBelumAktif.*
 
 ## US-06 Proteksi halaman admin
 
