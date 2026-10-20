@@ -649,8 +649,64 @@ Fitur **US-11 Filter kategori atau pencarian** telah selesai diimplementasikan s
 6. **Uji tombol Reset**:
    - Klik tombol **Reset** untuk menghapus semua filter dan kata kunci pencarian.
 
+### US-12 Pilih jumlah atau varian
+
+Sebagai pengunjung, saya ingin memilih jumlah atau varian sebelum memesan, dan pilihan itu ikut tertulis di pesan WhatsApp.
+
+Bernilai 10 poin.
+
+Kriteria selesai:
+
+- Pengunjung bisa memilih jumlah atau varian sebelum memesan. (5 poin)
+- Pilihan itu ikut tertulis di pesan WhatsApp. (5 poin)
 
 ### Perubahan yang Dilakukan
+
+Viewed user-stories.md:140-185
+Searched for "US-12"
+Searched for "WhatsApp"
+Searched for "TombolWhatsApp"
+Viewed TombolWhatsApp.jsx:1-21
+Viewed page.jsx:1-46
+Viewed toko.js:1-10
+Viewed TombolWhatsApp.jsx:1-21
+Edited TombolWhatsApp.jsx
+Ran command: `npx next build --webpack`
+
+Saat ini sedang memverifikasi build aplikasi untuk memastikan implementasi **US-12: Pilih jumlah atau varian** berhasil dikompilasi dengan baik.
+
+Ran command: `node -e "fetch('http://localhost:3000/produk/1').then(r => r.text()).then(t => { console.log('Has Pilihan varian:', t.includes('Pilih varian')); console.log('Has Jumlah:', t.includes('Jumlah')); console.log('Has WhatsApp link:', t.includes('wa.me/')); });"`
+
+Fitur **US-12 Pilih jumlah atau varian** telah selesai diimplementasikan sesuai dengan seluruh kriteria yang ditentukan.
+
+### Ringkasan Perubahan
+
+1. [components/TombolWhatsApp.jsx](file:///c:/Faiz/My%20project/katalog-umkm/components/TombolWhatsApp.jsx)
+   - Mengubah komponen menjadi Client Component (`"use client"`).
+   - **Pemilih Varian**: Menyediakan pilihan opsi varian produk (misalnya: *Original*, *Dingin*, *Hangat* untuk Minuman; *Original*, *Pedas*, *Manis Gurih* untuk Camilan; *Toples 250 g*, *Toples 500 g* untuk Kue Kering; dst.). Pilihan varian aktif ditandai dengan warna hijau tua (`bg-utama text-white`).
+   - **Pemilih Jumlah**: Menyediakan kontrol kuantitas dengan tombol minus (`-`), input angka langsung, dan tombol plus (`+`), serta menampilkan kalkulasi subtotal harga dinamis jika jumlah lebih dari 1.
+   - **Pesan WhatsApp Otomatis**: Pesan WhatsApp yang dibuat otomatis menyertakan nama produk, varian yang dipilih, jumlah produk (pcs), dan total harga dalam format rupiah:
+     `Halo, saya ingin memesan [Nama Produk] (Varian: [Varian]) sebanyak [Jumlah] pcs seharga [Total Rupiah].`
+
+---
+
+### Cara Mengetes
+
+1. **Buka halaman detail produk**:
+   Akses salah satu produk di browser (misalnya: `http://localhost:3000/produk/1` atau klik kartu produk mana pun dari halaman utama).
+2. **Uji pemilihan varian**:
+   - Klik salah satu opsi varian pada bagian *"Pilih varian:"*.
+   - Opsi yang dipilih akan aktif berwarna hijau tua.
+3. **Uji penyesuaian jumlah**:
+   - Klik tombol **`+`** untuk menambah jumlah (misal menjadi `2`).
+   - Perhatikan subtotal harga otomatis terhitung dan tampil di sebelah input jumlah.
+   - Klik tombol **`-`** untuk mengurangi jumlah (tidak bisa kurang dari `1`).
+   - Anda juga dapat mengetik angka jumlah secara langsung di kolom input.
+4. **Uji tautan WhatsApp**:
+   - Klik tombol **Pesan via WhatsApp**.
+   - Tautan akan membuka tab baru ke `https://wa.me/...`.
+   - Pastikan teks pesan di URL memuat nama produk, varian yang dipilih, jumlah pcs yang benar, dan total harga dalam rupiah.
+   
 ### Perubahan yang Dilakukan
 ### Perubahan yang Dilakukan
 ### Perubahan yang Dilakukan
