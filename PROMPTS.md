@@ -368,5 +368,66 @@ Pekerjaan untuk **US-07: List Produk di Halaman Admin** telah selesai.
 2. Setelah berhasil masuk ke `http://localhost:3000/admin`, periksa tabel produk:
    - Pastikan produk yang tampil adalah seluruh data yang tersimpan di tabel `produk` Supabase (bukan 6 data contoh statis).
    - Pastikan nama produk pertama sesuai dengan data database (contoh: *"Emas 1KG"*).
-   
+
+### US-08 Tambah produk
+
+Sebagai admin, saya ingin menambah produk baru dari halaman admin.
+
+Bernilai 10 poin.
+
+Kriteria selesai:
+
+- Form di `/admin/produk/baru` menyimpan produk ke database. (5 poin)
+- Setelah menyimpan, halaman kembali ke `/admin`. (2 poin)
+- Aksinya terlindungi login: tanpa login ditolak oleh server. (3 poin)
+
+### Perubahan yang Dilakukan
+
+Viewed page.jsx:1-16
+Viewed FormProduk.jsx:1-35
+Edited FormProduk.jsx
+Viewed actions.js:1-45
+Viewed actions.js:44-86
+Edited actions.js
+Edited actions.js
+Edited page.jsx
+Ran command: `npx next build --webpack`
+Used tool: manage_task
+Used tool: manage_task
+Ran command: `node --env-file=.env.local -e "import('./app/admin/actions.js').then(async m => { const fd = new FormData(); fd.append('nama', 'Test'); fd.append('harga', '10000'); const res = await m.tambahProduk(null, fd); console.log('Unauthorized tambahProduk:', res); })"`
+
+Pekerjaan untuk **US-08: Tambah produk** telah selesai.
+
+### Perubahan yang Dilakukan
+
+1. **[app/admin/actions.js](file:///c:/Faiz/My%20project/katalog-umkm/app/admin/actions.js)**:
+   - Menambahkan Server Action `tambahProduk(prevState, formData)`.
+   - Memeriksa sesi login admin di server menggunakan `supabase.auth.getUser()` (aksi ditolak jika belum login).
+   - Memvalidasi input (nama wajib diisi, harga berupa angka tidak negatif).
+   - Menyimpan data produk ke tabel `produk` di Supabase.
+   - Melakukan revalidasi cache (`revalidatePath`) untuk `/admin` dan `/`, lalu mengarahkan kembali ke `/admin` (`redirect("/admin")`).
+
+2. **[components/FormProduk.jsx](file:///c:/Faiz/My%20project/katalog-umkm/components/FormProduk.jsx)**:
+   - Mendukung prop `action` dengan React 19 `useActionState` untuk memproses form dan menampilkan pesan error jika ada.
+   - Menampilkan status tombol *"Menyimpan..."* saat form sedang diproses.
+
+3. **[app/admin/produk/baru/page.jsx](file:///c:/Faiz/My%20project/katalog-umkm/app/admin/produk/baru/page.jsx)**:
+   - Menyambungkan form ke Server Action `tambahProduk`.
+   - Menghapus komponen `CatatanBelumAktif`.
+
+---
+
+### Cara Mengetes
+
+1. **Login Admin**:
+   - Buka `http://localhost:3000/admin/login` dan masuk dengan akun admin.
+2. **Buka Form Tambah Produk**:
+   - Buka `http://localhost:3000/admin/produk/baru` (atau klik tombol **"Tambah produk"** di `/admin`).
+   - Pastikan catatan belum aktif sudah tidak ada.
+3. **Uji Tambah Produk**:
+   - Isi form (Nama: contoh *"Emas Antam 5g"*, Harga: *5000000*, Kategori: *Perhiasan*, Link foto: */produk/kopi.svg*, Deskripsi: *Emas murni batangan*).
+   - Klik tombol **"Simpan produk"**.
+   - Halaman otomatis kembali ke `/admin` dan produk yang baru ditambahkan langsung muncul di tabel serta katalog beranda (`/`).
+4. **Uji Proteksi Tanpa Login**:
+   - Akses `/admin/produk/baru` di jendela penyamaran (incognito) tanpa login: otomatis dialihkan ke `/admin/login`.
 Tambahkan bagian baru untuk setiap error yang kamu perbaiki atau fitur bonus yang kamu kerjakan.
