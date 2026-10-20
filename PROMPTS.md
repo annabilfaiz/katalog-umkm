@@ -430,4 +430,75 @@ Pekerjaan untuk **US-08: Tambah produk** telah selesai.
    - Halaman otomatis kembali ke `/admin` dan produk yang baru ditambahkan langsung muncul di tabel serta katalog beranda (`/`).
 4. **Uji Proteksi Tanpa Login**:
    - Akses `/admin/produk/baru` di jendela penyamaran (incognito) tanpa login: otomatis dialihkan ke `/admin/login`.
+
+### US-09 Ubah produk
+
+Sebagai admin, saya ingin mengubah data produk.
+
+Bernilai 10 poin.
+
+Kriteria selesai:
+
+- Form di `/admin/produk/[id]/ubah` terisi data lama. (4 poin)
+- Perubahan tersimpan ke database. (3 poin)
+- Aksinya terlindungi login: tanpa login ditolak oleh server. (3 poin)
+
+### Perubahan yang Dilakukan
+
+Viewed page.jsx:1-25
+Edited FormProduk.jsx
+Viewed actions.js:100-137
+Edited actions.js
+Edited page.jsx
+Ran command: `npx next build --webpack`
+Used tool: manage_task
+Searched for "data-contoh"
+Viewed page.jsx:1-57
+Viewed FormProduk.jsx:1-52
+Viewed actions.js:1-203
+Viewed user-stories.md:1-615
+Ran command: `npx next build --webpack`
+
+Saat ini sedang memverifikasi build aplikasi untuk memastikan seluruh implementasi **US-09: Ubah produk** berjalan tanpa kendala sintaks atau kompilasi.
+
+Fitur **US-09 Ubah produk** telah selesai diimplementasikan sesuai dengan seluruh kriteria yang ditentukan.
+
+### Ringkasan Perubahan
+
+1. [components/FormProduk.jsx](file:///c:/Faiz/My%20project/katalog-umkm/components/FormProduk.jsx)
+   - Menambahkan field tersembunyi `<input type="hidden" name="id" defaultValue={produk.id} />` agar ID produk yang diedit terkirim saat form disubmit.
+   - Menggunakan nilai awal (`defaultValue`) dari data produk lama untuk `nama`, `harga`, `kategori`, `foto_url`, dan `deskripsi`.
+
+2. [app/admin/actions.js](file:///c:/Faiz/My%20project/katalog-umkm/app/admin/actions.js)
+   - Mengimplementasikan Server Action `ubahProduk`.
+   - Melindungi aksi di server: memeriksa sesi login admin via `supabase.auth.getUser()`, menolak aksi jika sesi tidak ada/tidak valid.
+   - Memvalidasi nama dan harga (angka positif).
+   - Memperbarui baris data di tabel `produk` di Supabase berdasarkan ID produk.
+   - Melakukan revalidasi cache (`revalidatePath`) untuk `/admin`, `/`, dan `/produk/[id]`, kemudian mengalihkan halaman ke `/admin`.
+
+3. [app/admin/produk/[id]/ubah/page.jsx](file:///c:/Faiz/My%20project/katalog-umkm/app/admin/produk/[id]/ubah/page.jsx)
+   - Mengambil data produk lama dari database Supabase di sisi server menggunakan `id` dari dynamic route `params`.
+   - Jika produk tidak ditemukan, memanggil `notFound()`.
+   - Mengirimkan data produk lama ke komponen [FormProduk.jsx](file:///c:/Faiz/My%20project/katalog-umkm/components/FormProduk.jsx) dengan action `ubahProduk`.
+   - Menghapus komponen `CatatanBelumAktif`.
+
+---
+
+### Cara Mengetes
+
+1. **Pastikan dev server berjalan**:
+   Akses `http://localhost:3000/admin`. (Jika belum login, masuk terlebih dahulu di `/admin/login`).
+2. **Buka halaman ubah produk**:
+   Di tabel produk `/admin`, klik tombol tautan **Ubah** pada salah satu produk. Halaman akan membuka rute `/admin/produk/[id]/ubah`.
+3. **Cek data lama**:
+   Pastikan input Nama, Harga, Kategori, Link foto, dan Deskripsi sudah terisi otomatis dengan data produk yang dipilih.
+4. **Uji simpan perubahan**:
+   - Ubah salah satu data (misalnya harga atau nama).
+   - Klik **Simpan perubahan**.
+   - Halaman akan kembali ke `/admin` dan menampilkan data terbaru yang sudah diperbarui di database.
+   - Buka halaman publik katalog (`/` dan `/produk/[id]`) untuk memastikan perubahan juga tampil di katalog pembeli.
+5. **Uji proteksi login**:
+   - Logout dari admin.
+   - Coba akses URL `/admin/produk/[id]/ubah` secara langsung di browser tanpa login. Halaman akan otomatis dialihkan ke `/admin/login`.
+   
 Tambahkan bagian baru untuk setiap error yang kamu perbaiki atau fitur bonus yang kamu kerjakan.
