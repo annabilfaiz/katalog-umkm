@@ -578,5 +578,85 @@ Fitur **US-10 Hapus produk** telah selesai diimplementasikan sesuai dengan selur
    - Klik **Keluar** di menu admin untuk mengakhiri sesi.
    - Aksi mutasi penghapusan di `hapusProduk` dilindungi di server dan ditolak secara otomatis oleh Supabase Auth & RLS jika tidak ada sesi yang valid.
 
-   
+### US-11 Filter kategori atau pencarian
+
+Sebagai pengunjung, saya ingin menyaring produk berdasarkan kategori atau mencari nama produk.
+
+Bernilai 10 poin.
+
+Kriteria selesai:
+
+- Pengunjung bisa menyaring produk per kategori atau mencari nama produk, dan hasilnya sesuai. (10 poin)
+
+### Perubahan yang Dilakukan
+
+Searched for "US-11"
+Searched for "pencarian"
+Searched for "filter"
+Viewed page.jsx:1-61
+Viewed Input.jsx:1-16
+Viewed server.js:1-29
+Ran command: `node --env-file=.env.local -e "import('./lib/supabase/server.js').then(async m => { const c = m.createServerClient(); const { data } = await c.from('produk').select('kategori'); const cats = [...new Set(data.map(p => p.kategori))]; console.log('Categories:', cats); const filtered = await c.from('produk').select('nama, kategori').ilike('kategori', 'Minuman'); console.log('Minuman count:', filtered.data?.length); const searched = await c.from('produk').select('nama').ilike('nama', '%kopi%'); console.log('Kopi search count:', searched.data?.length); })"`
+Viewed KartuProduk.jsx:1-25
+Edited page.jsx
+Ran command: `npx next build --webpack`
+
+Saat ini sedang memverifikasi build aplikasi untuk memastikan implementasi **US-11: Filter kategori atau pencarian** berhasil dikompilasi dengan baik.
+
+Ran command: `node -e "fetch('http://localhost:3000/?kategori=Minuman').then(r => r.text()).then(t => { console.log('Contains Minuman:', t.includes('Minuman')); console.log('Contains Kopi:', t.includes('Kopi')); }); fetch('http://localhost:3000/?q=xyznotfound123').then(r => r.text()).then(t => { console.log('Not found message:', t.includes('Tidak ada produk yang sesuai')); });"`
+
+Fitur **US-11 Filter kategori atau pencarian** telah selesai diimplementasikan sesuai dengan seluruh kriteria yang ditentukan.
+
+### Ringkasan Perubahan
+
+1. [app/page.jsx](file:///c:/Faiz/My%20project/katalog-umkm/app/page.jsx)
+   - **Mendukung `searchParams` dinamis**: Membaca parameter pencarian `q` / `cari` dan filter `kategori` di Server Component.
+   - **Kueri Supabase**:
+     - Menyaring data produk berdasarkan kategori menggunakan `.ilike("kategori", kategoriAktif)`.
+     - Mencari nama produk menggunakan `.ilike("nama", `%${kataKunci}%`)`.
+     - Mengambil daftar kategori unik secara dinamis langsung dari database.
+   - **Form Pencarian**:
+     - Input pencarian nama produk yang terintegrasi (mempertahankan kategori yang sedang dipilih).
+     - Tombol **Cari** dan tombol **Reset** untuk membersihkan filter.
+   - **Pill Filter Kategori**:
+     - Pilihan kategori (Semua, Minuman, Camilan, Bumbu, Kue kering, Kerajinan, Kain, dll.) dengan penanda aktif (`bg-utama text-white`).
+     - Mempertahankan kata kunci pencarian yang aktif saat berpindah kategori.
+   - **State Hasil Kosong yang Ramah**:
+     - Jika hasil pencarian/filter tidak ditemukan, menampilkan pesan *"Tidak ada produk yang sesuai"* beserta tombol *"Lihat semua produk"*.
+
+---
+
+### Cara Mengetes
+
+1. **Buka halaman utama**:
+   Akses `http://localhost:3000/`. Semua produk dan tombol pill kategori akan tampil di bagian atas katalog produk.
+2. **Uji filter per kategori**:
+   - Klik salah satu kategori (misalnya **Minuman**).
+   - URL akan berubah menjadi `/?kategori=Minuman`.
+   - Hanya produk dengan kategori "Minuman" yang akan ditampilkan, dan tombol "Minuman" aktif berwarna hijau tua.
+   - Klik **Semua** untuk kembali melihat seluruh kategori.
+3. **Uji pencarian nama produk**:
+   - Ketik nama produk di kolom pencarian (misalnya: `kopi`) lalu tekan Enter atau klik **Cari**.
+   - URL akan menjadi `/?q=kopi`.
+   - Hanya produk yang namanya memuat kata "kopi" yang akan muncul.
+4. **Uji kombinasi filter & pencarian**:
+   - Pilih kategori tertentu (misalnya **Minuman**) lalu cari `kopi`.
+   - URL menjadi `/?kategori=Minuman&q=kopi`.
+   - Hasil akan menampilkan produk minuman yang bernama kopi.
+5. **Uji pencarian tidak ditemukan**:
+   - Masukkan kata kunci acak yang tidak ada di katalog (misalnya `xyz123`).
+   - Tampilan akan menginfokan *"Tidak ada produk yang sesuai"* dan menyediakan tombol *"Lihat semua produk"*.
+6. **Uji tombol Reset**:
+   - Klik tombol **Reset** untuk menghapus semua filter dan kata kunci pencarian.
+
+
+### Perubahan yang Dilakukan
+### Perubahan yang Dilakukan
+### Perubahan yang Dilakukan
+### Perubahan yang Dilakukan
+### Perubahan yang Dilakukan
+### Perubahan yang Dilakukan
+### Perubahan yang Dilakukan
+### Perubahan yang Dilakukan
+### Perubahan yang Dilakukan
 Tambahkan bagian baru untuk setiap error yang kamu perbaiki atau fitur bonus yang kamu kerjakan.
