@@ -188,9 +188,73 @@ Pekerjaan untuk **US-03: Pesan via WhatsApp** telah selesai.
 
 ## US-04 Login admin
 
-**Prompt:**
+**Prompt:*Baca AGENTS.md bagian aturan keamanan dan docs/user-stories.md bagian US-04.
 
-**Hasil:**
+Buat login admin memakai Supabase Auth (email dan password) dengan @supabase/ssr dan cookie, memakai SUPABASE_URL dan SUPABASE_PUBLISHABLE_KEY. Login diproses dengan Server Action di app/admin/actions.js dan disambungkan ke form di app/admin/login/page.jsx. Login berhasil diarahkan ke /admin; login gagal menampilkan pesan error yang jelas di halaman login. Buat juga tombol "Keluar" di components/NavAdmin.jsx berfungsi: mengakhiri sesi lalu kembali ke /admin/login. Jangan ubah tampilan. Hapus CatatanBelumAktif dari halaman login.*
+
+**Hasil:*Viewed user-stories.md:52-65
+Viewed page.jsx:1-29
+Viewed NavAdmin.jsx:1-19
+Viewed Tombol.jsx:1-26
+Viewed Input.jsx:1-16
+Viewed page.jsx:1-28
+Viewed page.jsx:1-43
+Viewed FormProduk.jsx:1-35
+Viewed page.jsx:1-16
+Viewed page.jsx:1-25
+Ran command: `node -e "import('@supabase/ssr').then(m => console.log(Object.keys(m)))"`
+Ran command: `node --env-file=.env.local -e "import('./lib/supabase/server.js').then(m => m.createClient().auth.admin.listUsers()).then(r => console.log('Users count:', r.data?.users?.length, 'Emails:', r.data?.users?.map(u => u.email)))"`
+Ran command: `node --env-file=.env.local -e "import('@supabase/ssr').then(async m => { const client = m.createServerClient(process.env.SUPABASE_URL, process.env.SUPABASE_PUBLISHABLE_KEY, { cookies: { getAll: () => [], setAll: () => {} } }); const res = await client.auth.signInWithPassword({ email: 'test@example.com', password: 'wrongpassword' }); console.log(res); })"`
+Created session.js
+Created index.js
+Created actions.js
+Edited page.jsx
+Edited NavAdmin.jsx
+Ran command: `node -e "fetch('http://localhost:3000/admin/login').then(async r => { console.log('Status /admin/login:', r.status); const t = await r.text(); console.log('Has Masuk admin:', t.includes('Masuk admin')); console.log('Has CatatanBelumAktif:', t.includes('CatatanBelumAktif') || t.includes('Login belum berfungsi')); console.log('Has email input:', t.includes('name=\"email\"')); console.log('Has password input:', t.includes('name=\"password\"')); })"`
+Ran command: `node -e "fetch('http://localhost:3000/admin/login').then(async r => { console.log('Status /admin/login:', r.status); const t = await r.text(); console.log('Has Masuk admin:', t.includes('Masuk admin')); console.log('Has CatatanBelumAktif:', t.includes('CatatanBelumAktif') || t.includes('Login belum berfungsi')); console.log('Has email input:', t.includes('type=\'email\'') || t.includes('type=\"email\"')); })"`
+Ran command: `powershell -Command "$r = Invoke-WebRequest -Uri 'http://localhost:3000/admin/login' -UseBasicParsing; Write-Host 'Status:' $r.StatusCode; Write-Host 'Has Catatan:' ($r.Content -match 'CatatanBelumAktif'); Write-Host 'Has Masuk admin:' ($r.Content -match 'Masuk admin')"`
+Ran command: `curl.exe -s http://localhost:3000/admin/login`
+Ran command: `node --env-file=.env.local -e "import('./app/admin/actions.js').then(async m => { const fd = new FormData(); fd.append('email', 'wrong@admin.com'); fd.append('password', 'wrongpassword'); const res = await m.masukAdmin(null, fd); console.log('masukAdmin result:', res); })"`
+Ran command: `npx next build --webpack`
+Used tool: manage_task
+Used tool: manage_task
+Used tool: manage_task
+
+Pekerjaan untuk **US-04: Login admin** telah selesai.
+
+### Perubahan yang Dilakukan
+
+1. **[lib/supabase/session.js](file:///c:/Faiz/My%20project/katalog-umkm/lib/supabase/session.js)** & **[lib/supabase/index.js](file:///c:/Faiz/My%20project/katalog-umkm/lib/supabase/index.js)**:
+   - Membuat helper `createSessionClient()` menggunakan `createServerClient` dari `@supabase/ssr` dan cookies Next.js (`cookies()` dari `next/headers`).
+   - Menggunakan `SUPABASE_URL` dan `SUPABASE_PUBLISHABLE_KEY` untuk mengelola sesi otentikasi admin.
+
+2. **[app/admin/actions.js](file:///c:/Faiz/My%20project/katalog-umkm/app/admin/actions.js)**:
+   - Membuat Server Action `masukAdmin(prevState, formData)` untuk memvalidasi input, melakukan login menggunakan `supabase.auth.signInWithPassword`, mengembalikan pesan error jika kredensial salah, dan mengarahkan ke `/admin` jika berhasil.
+   - Membuat Server Action `keluarAdmin()` untuk mengakhiri sesi auth dengan `supabase.auth.signOut()` lalu mengarahkan ke `/admin/login`.
+
+3. **[app/admin/login/page.jsx](file:///c:/Faiz/My%20project/katalog-umkm/app/admin/login/page.jsx)**:
+   - Menyambungkan form ke Server Action `masukAdmin` menggunakan hook React 19 `useActionState`.
+   - Menampilkan pesan error yang jelas di atas form jika login gagal.
+   - Menghapus komponen `CatatanBelumAktif` dengan tetap mempertahankan tampilan form yang ada.
+
+4. **[components/NavAdmin.jsx](file:///c:/Faiz/My%20project/katalog-umkm/components/NavAdmin.jsx)**:
+   - Mengubah tombol **"Keluar"** agar menjalankan Server Action `keluarAdmin` melalui form submission tanpa mengubah styling maupun tata letak navigasi.
+
+---
+
+### Cara Mengetes
+
+1. **Uji Login Gagal**:
+   - Buka `http://localhost:3000/admin/login`.
+   - Masukkan email atau password yang salah, lalu klik tombol **"Masuk"**.
+   - Pastikan muncul pesan error: *"Email atau password salah. Silakan periksa kembali."* dan halaman tetap berada di `/admin/login`.
+2. **Uji Login Berhasil**:
+   - Masukkan email admin yang terdaftar di Supabase Auth dan password-nya.
+   - Klik tombol **"Masuk"**.
+   - Pastikan berhasil diarahkan ke halaman `/admin`.
+3. **Uji Keluar (Logout)**:
+   - Di halaman `/admin`, klik tombol **"Keluar"** di bilah navigasi kanan atas.
+   - Pastikan sesi admin diakhiri dan browser dialihkan kembali ke `/admin/login`.*
 
 **Perbaikan:**
 
