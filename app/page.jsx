@@ -6,10 +6,11 @@ import { createServerClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
-function buatUrlKatalog({ kategori, q }) {
+function buatUrlKatalog({ kategori, q, urut }) {
   const sp = new URLSearchParams();
   if (kategori) sp.set("kategori", kategori);
   if (q) sp.set("q", q);
+  if (urut) sp.set("urut", urut);
   const qs = sp.toString();
   return qs ? `/?${qs}` : "/";
 }
@@ -22,6 +23,14 @@ export default async function HalamanKatalog({ searchParams }) {
     kategoriParam && kategoriParam.toLowerCase() !== "semua"
       ? kategoriParam
       : "";
+  const urutParam = (
+    resolvedSearchParams.urut ||
+    resolvedSearchParams.urutan ||
+    resolvedSearchParams.sort ||
+    ""
+  )
+    .trim()
+    .toLowerCase();
 
   let daftarProduk = null;
   let daftarKategori = [];
@@ -30,10 +39,7 @@ export default async function HalamanKatalog({ searchParams }) {
   try {
     const supabase = createServerClient();
 
-    let query = supabase
-      .from("produk")
-      .select("*")
-      .order("id", { ascending: true });
+    let query = supabase.from("produk").select("*");
 
     if (kategoriAktif) {
       query = query.ilike("kategori", kategoriAktif);
@@ -41,6 +47,17 @@ export default async function HalamanKatalog({ searchParams }) {
 
     if (kataKunci) {
       query = query.ilike("nama", `%${kataKunci}%`);
+    }
+
+    // Urutan diterapkan saat mengambil data (query database) (US-15)
+    if (urutParam === "termurah") {
+      query = query.order("harga", { ascending: true });
+    } else if (urutParam === "termahal") {
+      query = query.order("harga", { ascending: false });
+    } else if (urutParam === "terbaru") {
+      query = query.order("created_at", { ascending: false });
+    } else {
+      query = query.order("id", { ascending: true });
     }
 
     const [{ data: produkData, error: produkError }, { data: kategoriData }] =
@@ -70,7 +87,13 @@ export default async function HalamanKatalog({ searchParams }) {
     pesanError = err.message || "Terjadi kesalahan saat menghubungkan ke database.";
   }
 
-  const adaFilter = Boolean(kataKunci || kategoriAktif);
+  const adaFilter = Boolean(kataKunci || kategoriAktif || urutParam);
+
+  const labelUrutan = {
+    termurah: "harga termurah",
+    termahal: "harga termahal",
+    terbaru: "produk terbaru",
+  };
 
   return (
     <>
@@ -98,6 +121,9 @@ export default async function HalamanKatalog({ searchParams }) {
             {kategoriAktif ? (
               <input type="hidden" name="kategori" value={kategoriAktif} />
             ) : null}
+            {urutParam ? (
+              <input type="hidden" name="urut" value={urutParam} />
+            ) : null}
             <Tombol type="submit" className="shrink-0 px-3.5 py-2 text-xs sm:text-sm">
               Cari
             </Tombol>
@@ -109,40 +135,76 @@ export default async function HalamanKatalog({ searchParams }) {
           </form>
         </div>
 
-        {/* Filter Kategori */}
-        {daftarKategori.length > 0 && (
-          <div className="flex flex-wrap items-center gap-2">
-            <Link
-              href={buatUrlKatalog({ kategori: "", q: kataKunci })}
-              className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors ${
-                !kategoriAktif
-                  ? "bg-utama text-white"
-                  : "border border-garis bg-latar text-teks hover:border-utama hover:text-utama"
-              }`}
-            >
-              Semua
-            </Link>
-            {daftarKategori.map((kat) => (
+        {/* Filter Kategori & Opsi Urutan (US-11 & US-15) */}
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-garis pb-4">
+          {daftarKategori.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2">
               <Link
-                key={kat}
-                href={buatUrlKatalog({ kategori: kat, q: kataKunci })}
+                href={buatUrlKatalog({ kategori: "", q: kataKunci, urut: urutParam })}
                 className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors ${
-                  kategoriAktif.toLowerCase() === kat.toLowerCase()
+                  !kategoriAktif
                     ? "bg-utama text-white"
                     : "border border-garis bg-latar text-teks hover:border-utama hover:text-utama"
                 }`}
               >
-                {kat}
+                Semua
               </Link>
-            ))}
+              {daftarKategori.map((kat) => (
+                <Link
+                  key={kat}
+                  href={buatUrlKatalog({ kategori: kat, q: kataKunci, urut: urutParam })}
+                  className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors ${
+                    kategoriAktif.toLowerCase() === kat.toLowerCase()
+                      ? "bg-utama text-white"
+                      : "border border-garis bg-latar text-teks hover:border-utama hover:text-utama"
+                  }`}
+                >
+                  {kat}
+                </Link>
+              ))}
+            </div>
+          )}
+
+          {/* Opsi Urutan: Terbaru, Termurah, Termahal */}
+          <div className="flex items-center gap-2 text-xs">
+            <span className="font-semibold text-teks-lembut">Urutkan:</span>
+            <div className="inline-flex rounded-lg border border-garis bg-latar p-0.5">
+              {[
+                { label: "Terbaru", value: "terbaru" },
+                { label: "Termurah", value: "termurah" },
+                { label: "Termahal", value: "termahal" },
+              ].map((item) => {
+                const isActive = urutParam === item.value;
+                return (
+                  <Link
+                    key={item.value}
+                    href={buatUrlKatalog({
+                      kategori: kategoriAktif,
+                      q: kataKunci,
+                      urut: isActive ? "" : item.value,
+                    })}
+                    className={`rounded-md px-2.5 py-1 font-semibold transition-colors ${
+                      isActive
+                        ? "bg-utama text-white"
+                        : "text-teks hover:text-utama"
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </div>
           </div>
-        )}
+        </div>
 
         {adaFilter && daftarProduk && (
           <p className="text-xs text-teks-lembut">
             Menampilkan {daftarProduk.length} produk
             {kataKunci ? ` untuk pencarian "${kataKunci}"` : ""}
             {kategoriAktif ? ` dalam kategori "${kategoriAktif}"` : ""}
+            {urutParam && labelUrutan[urutParam]
+              ? ` diurutkan berdasarkan ${labelUrutan[urutParam]}`
+              : ""}
           </p>
         )}
 
@@ -178,5 +240,6 @@ export default async function HalamanKatalog({ searchParams }) {
     </>
   );
 }
+
 
 

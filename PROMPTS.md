@@ -706,13 +706,100 @@ Fitur **US-12 Pilih jumlah atau varian** telah selesai diimplementasikan sesuai 
    - Klik tombol **Pesan via WhatsApp**.
    - Tautan akan membuka tab baru ke `https://wa.me/...`.
    - Pastikan teks pesan di URL memuat nama produk, varian yang dipilih, jumlah pcs yang benar, dan total harga dalam rupiah.
-   
+### US-13 PWA
+
+Sebagai pengunjung, saya ingin memasang katalog di layar HP seperti aplikasi. Ikon tersedia di `public/icons`.
+
+Bernilai 10 poin.
+
+Kriteria selesai:
+
+- Ada web app manifest yang ditautkan di halaman. (4 poin)
+- Ikon tersedia di `public/icons` dan dirujuk di manifest. (3 poin)
+- Katalog bisa di-install ke layar utama HP. (3 poin)
+
 ### Perubahan yang Dilakukan
+
+1. [app/manifest.js](file:///c:/Faiz/My%20project/katalog-umkm/app/manifest.js)
+   - Membuat file manifest dinamis Next.js App Router yang menyediakan rute `/manifest.webmanifest`.
+   - Mengisi konfigurasi standar PWA (`name`, `short_name`, `description`, `start_url: "/"`, `display: "standalone"`, `background_color: "#ffffff"`, `theme_color: "#1f6b4f"`).
+   - Menghubungkan ikon `icon-192.png` dan `icon-512.png` dari folder `/icons/` dengan tipe `image/png` dan `purpose: "any maskable"`.
+
+2. [public/manifest.json](file:///c:/Faiz/My%20project/katalog-umkm/public/manifest.json)
+   - Menyediakan static `manifest.json` di folder `public` untuk kompatibilitas penuh dengan parser manifest yang mencari rute `/manifest.json`.
+
+3. [app/layout.jsx](file:///c:/Faiz/My%20project/katalog-umkm/app/layout.jsx)
+   - Menautkan `manifest: "/manifest.webmanifest"` pada `metadata`.
+   - Menambahkan metadata iOS `appleWebApp` dan icon `apple: "/icons/icon-192.png"`.
+   - Menambahkan konfigurasi `viewport` dengan `themeColor: "#1f6b4f"`.
+
+---
+
+### Cara Mengetes
+
+1. **Periksa Endpoint Manifest**:
+   - Buka `http://localhost:3000/manifest.webmanifest` dan `http://localhost:3000/manifest.json` di browser.
+   - Pastikan data JSON manifest tampil lengkap dengan nama toko, `start_url: "/"`, `display: "standalone"`, dan tautan ikon.
+2. **Periksa Ikon**:
+   - Buka `http://localhost:3000/icons/icon-192.png` dan `http://localhost:3000/icons/icon-512.png` dan pastikan ikon termuat dengan status HTTP 200.
+3. **Periksa Head Tag di Halaman**:
+   - Buka `http://localhost:3000/` dan periksa tab Elements di DevTools.
+   - Pastikan terdapat tag `<link rel="manifest" href="/manifest.webmanifest">` dan `<meta name="theme-color" content="#1f6b4f">`.
+4. **Uji Kemampuan Install PWA**:
+   - Buka Chrome DevTools > tab **Application** > **Manifest**.
+   - Periksa bahwa manifest terdeteksi tanpa error, ikon 192px dan 512px terverifikasi, dan tombol install aplikasi muncul di browser.
+
+### US-14 Deskripsi produk dibuat AI
+
+Sebagai admin, saya ingin membuat deskripsi produk secara otomatis dengan AI (Gemini API) dari nama dan kategori produk.
+
+Bernilai 10 poin.
+
+Kriteria selesai:
+
+- Admin bisa membuat deskripsi otomatis dari nama dan kategori produk. (4 poin)
+- Gemini API dipanggil dari server, kunci tidak ada di browser. (3 poin)
+- Hasilnya mengisi kolom deskripsi sebelum produk disimpan. (3 poin)
+
 ### Perubahan yang Dilakukan
-### Perubahan yang Dilakukan
-### Perubahan yang Dilakukan
-### Perubahan yang Dilakukan
-### Perubahan yang Dilakukan
-### Perubahan yang Dilakukan
-### Perubahan yang Dilakukan
+
+1. [app/admin/actions.js](file:///c:/Faiz/My%20project/katalog-umkm/app/admin/actions.js)
+   - Menambahkan Server Action `buatDeskripsiAI(nama, kategori)`.
+   - Melindungi aksi di sisi server: memastikan sesi admin aktif via `supabase.auth.getUser()` sebelum memanggil AI.
+   - Memanggil Google Gemini REST API (`https://generativelanguage.googleapis.com/v1beta/models/...:generateContent`) secara eksklusif dari server menggunakan `process.env.GEMINI_API_KEY`.
+   - Menggunakan prompt terarah dalam bahasa Indonesia untuk menghasilkan deskripsi produk UMKM yang menarik (2-3 kalimat) berdasarkan nama dan kategori produk.
+   - Mengamankan kunci API agar tidak pernah dikirim atau diekspos ke browser.
+
+2. [components/FormProduk.jsx](file:///c:/Faiz/My%20project/katalog-umkm/components/FormProduk.jsx)
+   - Menambahkan tombol *"✨ Buat deskripsi dengan AI"* tepat di sebelah label Deskripsi.
+   - Mengambil nilai nama dan kategori yang sedang diisi oleh admin.
+   - Memanggil Server Action `buatDeskripsiAI` dengan status pemuatan ("Sedang membuat deskripsi...") dan penanganan pesan error/sukses.
+   - Otomatis mengisi textarea deskripsi dengan hasil respons AI, sehingga admin dapat meninjau atau mengedit teks sebelum produk disimpan.
+
+3. [.env.example](file:///c:/Faiz/My%20project/katalog-umkm/.env.example)
+   - Mendokumentasikan variabel `GEMINI_API_KEY` untuk konfigurasi di `.env.local` dan environment variable hosting.
+
+---
+
+### Cara Mengetes
+
+1. **Konfigurasi Kunci API**:
+   - Dapatkan API key dari [Google AI Studio](https://aistudio.google.com/).
+   - Tambahkan `GEMINI_API_KEY=kunci_api_anda` ke file `.env.local`.
+2. **Buka Form Tambah / Ubah Produk**:
+   - Login ke `http://localhost:3000/admin`.
+   - Buka form tambah produk di `http://localhost:3000/admin/produk/baru` atau ubah salah satu produk.
+3. **Uji Validasi Nama Kosong**:
+   - Kosongkan kolom "Nama produk" lalu klik tombol **✨ Buat deskripsi dengan AI**.
+   - Akan muncul pesan peringatan: *"Harap isi nama produk terlebih dahulu sebelum membuat deskripsi AI."*
+4. **Uji Pembuatan Deskripsi AI**:
+   - Isi Nama produk (misalnya: *"Kopi Arabika Gayo Specialty"*) dan Kategori (misalnya: *"Minuman"*).
+   - Klik tombol **✨ Buat deskripsi dengan AI**.
+   - Tombol akan berubah menjadi indikator loading *"Sedang membuat deskripsi..."*.
+   - Kolom textarea Deskripsi akan terisi otomatis dengan deskripsi produk yang dihasilkan oleh Gemini AI.
+5. **Uji Simpan Produk**:
+   - Tinjau atau tambahkan kata-kata pada deskripsi yang dihasilkan AI jika diinginkan.
+   - Klik **Simpan produk** / **Simpan perubahan**.
+   - Produk berhasil disimpan ke database lengkap dengan deskripsi hasil AI.
+
 Tambahkan bagian baru untuk setiap error yang kamu perbaiki atau fitur bonus yang kamu kerjakan.

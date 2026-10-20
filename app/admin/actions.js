@@ -240,5 +240,93 @@ export async function hapusProduk(idOrFormData) {
   return { success: true };
 }
 
+/**
+ * Server Action untuk membuat deskripsi produk otomatis menggunakan Google Gemini API (US-14).
+ * Dipanggil dari server sehingga GEMINI_API_KEY tidak pernah terekspos ke browser.
+ */
+export async function buatDeskripsiAI(nama, kategori) {
+  const namaProduk = typeof nama === "string" ? nama.trim() : "";
+  const kategoriProduk = typeof kategori === "string" ? kategori.trim() : "";
+
+  if (!namaProduk) {
+    return { error: "Nama produk harus diisi terlebih dahulu." };
+  }
+
+  // Verifikasi otentikasi admin di server
+  const supabase = await createSessionClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    return { error: "Sesi telah berakhir atau Anda belum masuk. Aksi ditolak." };
+  }
+
+  const apiKey =
+    process.env.GEMINI_API_KEY ||
+    process.env.GOOGLE_API_KEY ||
+    process.env.GOOGLE_GEMINI_API_KEY;
+
+  if (!apiKey) {
+    return {
+      error:
+        "Kunci GEMINI_API_KEY belum diatur di file .env.local server. Dapatkan kunci API di https://aistudio.google.com/.",
+    };
+  }
+
+  const prompt = `Buat deskripsi produk yang menarik, singkat, dan persuasif (2-3 kalimat) dalam bahasa Indonesia untuk produk UMKM berikut:
+Nama produk: ${namaProduk}
+Kategori: ${kategoriProduk || "Umum"}
+
+Ketentuan:
+- Hanya kembalikan teks deskripsi saja tanpa tanda kutip pembuka atau penutup.
+- Jangan gunakan format markdown (tanpa simbol bintang, tanpa bold, tanpa bullet points).
+- Deskripsi harus jelas, profesional, dan menggugah minat pembeli.`;
+
+  const models = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-2.5-flash"];
+  let lastError = null;
+
+  for (const model of models) {
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [{ text: prompt }],
+            },
+          ],
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (text) {
+          const cleanedText = text
+            .trim()
+            .replace(/^["']|["']$/g, "")
+            .trim();
+          return { deskripsi: cleanedText };
+        }
+      } else {
+        const errJson = await res.json().catch(() => null);
+        lastError = errJson?.error?.message || `HTTP ${res.status}`;
+      }
+    } catch (e) {
+      lastError = e?.message;
+    }
+  }
+
+  return {
+    error: `Gagal membuat deskripsi dengan Gemini API: ${lastError || "Tidak ada respon dari AI."}`,
+  };
+}
+
 
 
