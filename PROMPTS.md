@@ -802,4 +802,50 @@ Kriteria selesai:
    - Klik **Simpan produk** / **Simpan perubahan**.
    - Produk berhasil disimpan ke database lengkap dengan deskripsi hasil AI.
 
+### US-15 Urutkan produk
+
+Sebagai pengunjung, saya ingin mengurutkan produk, supaya cepat menemukan yang murah atau yang terbaru.
+
+Bernilai 5 poin.
+
+Kriteria selesai:
+
+- Ada pilihan urutan: termurah, termahal, terbaru. (3 poin)
+- Urutan diterapkan saat mengambil data (query), bukan hanya di tampilan. (2 poin)
+
+### Perubahan yang Dilakukan
+
+1. [app/page.jsx](file:///c:/Faiz/My%20project/katalog-umkm/app/page.jsx)
+   - **Mendukung Parameter Urutan**: Membaca parameter urutan `urut` / `urutan` / `sort` di Server Component.
+   - **Kueri Supabase (Query Database)**: Menerapkan pengurutan langsung di level database query menggunakan:
+     - `query.order("harga", { ascending: true })` untuk "termurah".
+     - `query.order("harga", { ascending: false })` untuk "termahal".
+     - `query.order("created_at", { ascending: false })` untuk "terbaru".
+     - `query.order("id", { ascending: true })` sebagai urutan bawaan (default).
+   - **UI Kontrol Urutan**:
+     - Menyediakan toggle pill tombol urutkan (*Terbaru*, *Termurah*, *Termahal*) yang terletak bersebelahan dengan filter kategori.
+     - Opsi yang aktif ditandai dengan warna hijau tua (`bg-utama text-white`).
+     - Mengintegrasikan parameter urutan dengan pencarian nama produk dan filter kategori yang sedang aktif (tidak mereset filter yang sedang dibuka).
+     - Menampilkan label status urutan pada bar informasi jumlah produk.
+
+---
+
+### Cara Mengetes
+
+1. **Buka Halaman Katalog Utama**:
+   - Akses `http://localhost:3000/`.
+   - Di bagian atas katalog, perhatikan kontrol **Urutkan: [ Terbaru | Termurah | Termahal ]**.
+2. **Uji Urutan Termurah**:
+   - Klik tombol **Termurah** (URL menjadi `/?urut=termurah`).
+   - Produk akan diurutkan dari harga paling rendah ke paling tinggi berdasarkan hasil query database.
+3. **Uji Urutan Termahal**:
+   - Klik tombol **Termahal** (URL menjadi `/?urut=termahal`).
+   - Produk akan diurutkan dari harga paling tinggi ke paling rendah.
+4. **Uji Urutan Terbaru**:
+   - Klik tombol **Terbaru** (URL menjadi `/?urut=terbaru`).
+   - Produk yang paling baru ditambahkan akan muncul paling depan berdasarkan kolom `created_at`.
+5. **Uji Kombinasi dengan Kategori dan Pencarian**:
+   - Pilih salah satu kategori (misal: "Minuman") lalu klik "Termurah" (URL: `/?kategori=Minuman&urut=termurah`).
+   - Hasil hanya menampilkan produk minuman yang terurut dari termurah.
+
 Tambahkan bagian baru untuk setiap error yang kamu perbaiki atau fitur bonus yang kamu kerjakan.
