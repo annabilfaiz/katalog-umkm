@@ -158,7 +158,7 @@ Used tool: manage_task
 
 Pekerjaan untuk **US-03: Pesan via WhatsApp** telah selesai.
 
-### Perubahan yang Dilakukan
+`### Perubahan yang Dilakukan`
 
 - **[components/TombolWhatsApp.jsx](file:///c:/Faiz/My%20project/katalog-umkm/components/TombolWhatsApp.jsx)**:
   - Mengubah elemen `<button>` menjadi tautan `<a>` dengan URL tujuan `https://wa.me/<nomor>?text=<pesan>`.
@@ -332,4 +332,41 @@ Dengan perubahan ini, semua halaman dan Server Actions di rute `/admin` hanya da
 
 ## Debugging dan fitur bonus
 
+### US-07 List Produk
+
+Sebagai admin, saya ingin produk pada page `/admin` mengambil data dari database.
+
+Bernilai 10 poin.
+
+Kriteria selesai:
+
+- Daftar produk di `/admin` diambil dari database, bukan data contoh. (10 poin)
+
+### Perubahan yang Dilakukan
+Viewed page.jsx:1-23
+Viewed TabelProduk.jsx:1-47
+Ran command: `node --env-file=.env.local -e "import('./lib/supabase/server.js').then(async m => { const res = await m.createClient().from('produk').select('*').order('id', {ascending: true}); console.log('Count:', res.data?.length); })"`
+Edited page.jsx
+Ran command: `npx next build --webpack`
+Used tool: manage_task
+Searched for "produkContoh"
+
+Pekerjaan untuk **US-07: List Produk di Halaman Admin** telah selesai.
+
+### Perubahan yang Dilakukan
+
+- **[app/admin/page.jsx](file:///c:/Faiz/My%20project/katalog-umkm/app/admin/page.jsx)**:
+  - Mengubah komponen menjadi Server Component `async` yang mengambil daftar produk langsung dari tabel `produk` di Supabase secara dinamis (`force-dynamic`).
+  - Menghapus impor dan pemakaian `produkContoh` dari [lib/data-contoh.js](file:///c:/Faiz/My%20project/katalog-umkm/lib/data-contoh.js).
+  - Mengirimkan data produk dari database ke komponen [TabelProduk](file:///c:/Faiz/My%20project/katalog-umkm/components/TabelProduk.jsx) untuk ditampilkan lengkap dengan foto, nama, kategori, harga, dan tombol aksi.
+
+---
+
+### Cara Mengetes
+
+1. Buka browser dan login ke `http://localhost:3000/admin/login` menggunakan akun admin.
+2. Setelah berhasil masuk ke `http://localhost:3000/admin`, periksa tabel produk:
+   - Pastikan produk yang tampil adalah seluruh data yang tersimpan di tabel `produk` Supabase (bukan 6 data contoh statis).
+   - Pastikan nama produk pertama sesuai dengan data database (contoh: *"Emas 1KG"*).
+   
 Tambahkan bagian baru untuk setiap error yang kamu perbaiki atau fitur bonus yang kamu kerjakan.
